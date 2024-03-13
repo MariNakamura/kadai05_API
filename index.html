@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="utf-8">
+    <!-- ページの文字コードをUTF-8に設定 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- レスポンシブデザインに対応するためのメタタグ -->
+    <title>映画アプリ</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- jQueryライブラリを読み込む -->
+</head>
+
+<body>
+    <h1>🍿映画🍿</h1>
+    <div class="buttons">
+        <button id="nowPlayingBtn">上映中</button>
+        <button id="upcomingBtn">公開予定</button>
+        <button id="popularBtn">人気順</button>
+        <button id="favoritesBtn">お気に入り</button>
+    </div>
+    
+    <div id="movies" class="movies-container"></div>
+    <div id="favorites" class="movies-container" style="display:none;"></div>
+    
+<script>
+// TMDbの APIキーを取得して、日本の映画データをとる
+const apiKey = 'd38f6eff19e55de29df9481c4e730476'; 
+const region = 'JP'; 
+
+// 各カテゴリの映画を取得するためのURL
+const nowPlayingUrl = `https://api.themoviedb.org/3/movie/now_playing?api_key=${apiKey}&language=ja-JP&page=1&region=${region}`;
+const upcomingUrl = `https://api.themoviedb.org/3/movie/upcoming?api_key=${apiKey}&language=ja-JP&page=1&region=${region}`;
+const popularUrl = `https://api.themoviedb.org/3/movie/popular?api_key=${apiKey}&language=ja-JP&page=1&region=${region}`;
+
+// jQuery オブジェクトを作成
+const moviesContainer = $('#movies');
+const favoritesContainer = $('#favorites');
+
+// 映画情報を取得して表示する関数
+function fetchMovies(url) {
+  $.ajax({
+    url: url, // 映画データを取得するURL
+    method: 'GET', // HTTPメソッドをGETにする
+    success: function(data) {
+      displayMovies(data.results); // 取得したデータから映画を表示
+    },
+    error: function(xhr, status, error) {
+      console.error('Error fetching movies:', error); // エラー発生時のログ
+    }
+  });
+}
+
+// 映画の情報を表示する関数
+function displayMovies(movies) {
+  moviesContainer.empty(); // 前の映画情報を削除
+  moviesContainer.show(); // 映画コンテナを表示
+  favoritesContainer.hide();
+
+  $.each(movies, function(index, movie) {
+    const movieDiv = $('<div>').addClass('movie'); 
+    const poster = $('<img>').attr('src', `https://image.tmdb.org/t/p/w500${movie.poster_path}`).attr('alt', movie.title); // ポスター画像
+    const detailsDiv = $('<div>').addClass('movie-details'); // 詳細情報用にボックス作る
+    const title = $('<h2>').text(movie.title); // 映画のタイトル
+    const releaseDate = $('<p>').text('公開日: ' + movie.release_date); // 公開日
+    const overview = $('<p>').text(movie.overview); // 概要
+    const favoriteBtn = $('<button>').text('add').addClass('favorite-btn').data('movie', movie); // お気に入り追加
+
+    detailsDiv.append(title, releaseDate, overview, favoriteBtn); // 詳細情報を追加
+    movieDiv.append(poster, detailsDiv); // ポスターと詳細情報をまとめる
+    moviesContainer.append(movieDiv); // 映画コンテナに追加
+  });
+}
+
+// お気に入りの映画を表示する関数、APIで自動取得できないのでここだけ用意する必要あり
+function displayFavorites() {
+  moviesContainer.hide(); 
+  favoritesContainer.show(); 
+  favoritesContainer.empty(); 
+
+  const favorites = JSON.parse(localStorage.getItem('favorites')) || []; // ローカルストレージからお気に入りデータを取得
+
+  if (favorites.length === 0) {
+    favoritesContainer.html('<p>お気に入りは登録されていません</p>'); // お気に入りが無い場合のメッセージ
+    return;
+  }
+
+  favorites.forEach(movie => { //ひとつ上と同じ
+    const movieDiv = $('<div>').addClass('movie');
+    const poster = $('<img>').attr('src', `https://image.tmdb.org/t/p/w500${movie.poster_path}`).attr('alt', movie.title);
+    const detailsDiv = $('<div>').addClass('movie-details');
+    const title = $('<h2>').text(movie.title);
+    const releaseDate = $('<p>').text('Release Date: ' + movie.release_date);
+    const overview = $('<p>').text(movie.overview);
+    const deleteBtn = $('<button>').text('Remove from Favorites').addClass('delete-btn').data('id', movie.id); // お気に入り削除ボタン
+
+    detailsDiv.append(title, releaseDate, overview, deleteBtn);
+    movieDiv.append(poster, detailsDiv);
+    favoritesContainer.append(movieDiv);
+  });
+}
+
+// お気に入り追加ボタンのイベントリスナー
+$(document).on('click', '.favorite-btn', function() {
+  const movie = $(this).data('movie'); 
+  let favorites = JSON.parse(localStorage.getItem('favorites')) || []; // ローカルストレージからお気に入りデータを取得
+
+  if (!favorites.some(fav => fav.id === movie.id)) { // まだお気に入りに追加されていない場合
+    favorites.push(movie); 
+    localStorage.setItem('favorites', JSON.stringify(favorites)); // ローカルストレージに保存
+    console.log('Added to favorites:', movie.title); // デバッグ用のログ
+  }
+});
+
+// お気に入り削除ボタンのイベントリスナー
+$(document).on('click', '.delete-btn', function() {
+  const movieId = $(this).data('id'); // クリックした映画のIDを取得
+  let favorites = JSON.parse(localStorage.getItem('favorites')) || []; // ローカルストレージからお気に入りデータを取得
+
+  favorites = favorites.filter(movie => movie.id !== movieId); // 削除対象の映画以外を残す
+  localStorage.setItem('favorites', JSON.stringify(favorites)); // ローカルストレージに保存
+  displayFavorites(); // お気に入り一覧を更新
+});
+
+// お気に入りボタン
+$('#favoritesBtn').on('click', function() {
+  displayFavorites(); // お気に入り一覧を表示
+});
+
+// 各カテゴリボタン
+$('#nowPlayingBtn').on('click', function() {
+  fetchMovies(nowPlayingUrl);
+});
+
+$('#upcomingBtn').on('click', function() {
+  fetchMovies(upcomingUrl); 
+});
+
+
+$('#popularBtn').on('click', function() {
+  fetchMovies(popularUrl);
+});
+
+// ページ読み込み時に上映中ページを表示
+$(document).ready(function() {
+  fetchMovies(nowPlayingUrl);
+});
+
+</script>
+</body>
+</html>

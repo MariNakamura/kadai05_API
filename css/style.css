@@ -1,0 +1,64 @@
+h1 {
+    text-align: center;
+}
+
+.buttons {
+    text-align: center;
+}
+
+/* 映画一覧 */
+.movies-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  
+  .movie {
+    width: 300px;
+    margin: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    overflow: hidden;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+  }
+  
+  .movie img {
+    width: 100%;
+    height: auto;
+  }
+  
+  .movie-details {
+    padding: 10px;
+  }
+  
+  .movie-details h2 {
+    font-size: 18px;
+    margin-top: 0;
+  }
+  
+  .movie-details p {
+    margin: 5px 0;
+  }
+  
+  /* お気に入り */
+  #favorites {
+    margin-top: 20px;
+  }
+  
+  /* レスポンシブデザイン */
+  @media (max-width: 768px) {
+    .movie {
+      width: 100%;
+    }
+  }
+
+  .movie-reviews {
+    margin-top: 10px;
+  }
+  
+  .review {
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 10px;
+    margin-bottom: 10px;
+  }
