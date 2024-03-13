@@ -6,6 +6,7 @@ My映画
 - 気になる映画は保存ボタンを押すと、お気に入り登録されます
 
 ## ③DEMO
+https://marinakamura.github.io/kadai05_API/
 
 ## ④工夫した点・こだわった点
 - 映画情報のAPIを使用しました
