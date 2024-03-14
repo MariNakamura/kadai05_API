@@ -92,7 +92,7 @@ function displayFavorites() {
     const title = $('<h2>').text(movie.title);
     const releaseDate = $('<p>').text('Release Date: ' + movie.release_date);
     const overview = $('<p>').text(movie.overview);
-    const deleteBtn = $('<button>').text('Remove from Favorites').addClass('delete-btn').data('id', movie.id); // お気に入り削除ボタン
+    const deleteBtn = $('<button>').text('Remove').addClass('delete-btn').data('id', movie.id); // お気に入り削除ボタン
 
     detailsDiv.append(title, releaseDate, overview, deleteBtn);
     movieDiv.append(poster, detailsDiv);
